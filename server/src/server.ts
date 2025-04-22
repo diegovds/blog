@@ -1,17 +1,42 @@
-import bodyParser from 'body-parser'
-import cors from 'cors'
-import express from 'express'
+import { fastifyCors } from '@fastify/cors'
+import { fastifySwagger } from '@fastify/swagger'
+import { fastifySwaggerUi } from '@fastify/swagger-ui'
+import fastify from 'fastify'
+import {
+  jsonSchemaTransform,
+  serializerCompiler,
+  validatorCompiler,
+  ZodTypeProvider,
+} from 'fastify-type-provider-zod'
+import { env } from './env'
+import { pingRoute } from './routes/ping-route'
 
-const server = express()
-server.use(cors())
-server.use(bodyParser.json())
-server.use(bodyParser.urlencoded({ extended: true }))
-server.use(express.static('public'))
+const app = fastify().withTypeProvider<ZodTypeProvider>()
 
-server.get('/ping', (req, res) => {
-  res.json({ pong: true })
+app.setSerializerCompiler(serializerCompiler)
+app.setValidatorCompiler(validatorCompiler)
+
+app.register(fastifyCors, {
+  origin: true,
 })
 
-server.listen(3333, () => {
-  console.log(`🚀 HTTP Server Running! http://localhost:3333`)
+app.register(fastifySwagger, {
+  openapi: {
+    info: {
+      title: 'Blog',
+      version: '0.0.1',
+      description: 'API for Blog',
+    },
+  },
+  transform: jsonSchemaTransform,
+})
+
+app.register(fastifySwaggerUi, {
+  routePrefix: '/docs',
+})
+
+app.register(pingRoute)
+
+app.listen({ port: env.PORT }).then(() => {
+  console.log(`🚀 HTTP Server Running! http://localhost:${env.PORT}`)
 })
