@@ -3,7 +3,7 @@ import { z } from 'zod'
 
 export const pingRoute: FastifyPluginAsyncZod = async (app) => {
   app.get(
-    '/ping',
+    '/api/ping',
     {
       schema: {
         summary: 'Route for server testing',
