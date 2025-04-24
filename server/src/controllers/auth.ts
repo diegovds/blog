@@ -1,5 +1,6 @@
 import { RequestHandler } from 'express'
 import z from 'zod'
+import { createToken } from '../services/auth'
 import { createUser } from '../services/user'
 
 export const signup: RequestHandler = async (req, res) => {
@@ -20,7 +21,7 @@ export const signup: RequestHandler = async (req, res) => {
     if (!newUser) {
       res.json({ error: 'Erro ao criar usuário' })
     } else {
-      const token = '123'
+      const token = createToken(newUser)
 
       res.status(201).json({
         user: {
