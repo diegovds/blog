@@ -22,12 +22,12 @@
     "@types/node": "^22.14.1",
     "@types/slug": "^5.0.9",
     "eslint": "^8.57.1",
-    "prisma": "^6.6.0",
+    "prisma": "^6.5.0",
     "tsx": "^4.19.3",
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "@prisma/client": "^6.6.0",
+    "@prisma/client": "^6.5.0",
     "bcryptjs": "^3.0.2",
     "body-parser": "^2.2.0",
     "cors": "^2.8.5",
