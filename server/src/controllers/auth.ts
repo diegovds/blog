@@ -9,24 +9,29 @@ export const signup: RequestHandler = async (req, res) => {
     password: z.string(),
   })
 
-  const { name, email, password } = bodySchema.parse(req.body)
+  const data = bodySchema.safeParse(req.body)
 
-  const newUser = await createUser({ name, email, password })
+  if (!data.success) {
+    res.json({ error: data.error.flatten().fieldErrors })
+  } else {
+    const { name, email, password } = data.data
+    const newUser = await createUser({ name, email, password })
 
-  if (!newUser) {
-    res.json({ error: 'Erro ao criar usuário' })
+    if (!newUser) {
+      res.json({ error: 'Erro ao criar usuário' })
+    } else {
+      const token = '123'
+
+      res.status(201).json({
+        user: {
+          id: newUser.id,
+          name: newUser.name,
+          email: newUser.email,
+        },
+        token,
+      })
+    }
   }
-
-  const token = '123'
-
-  res.status(201).json({
-    user: {
-      id: newUser.id,
-      name: newUser.name,
-      email: newUser.email,
-    },
-    token,
-  })
 }
 
 export const signin: RequestHandler = async (req, res) => {}
