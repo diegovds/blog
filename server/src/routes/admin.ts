@@ -13,5 +13,10 @@ adminRoutes.post(
 )
 adminRoutes.get('/posts', adminController.getAllPosts)
 adminRoutes.get('/posts/:slug', adminController.getAPost)
-adminRoutes.put('/posts/:slug', adminController.updateAPost)
+adminRoutes.put(
+  '/posts/:slug',
+  privateRoute,
+  upload.single('cover'),
+  adminController.editAPost,
+)
 adminRoutes.delete('/posts/:slug', adminController.deleteAPost)

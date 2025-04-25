@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client'
 import fs from 'fs/promises'
 import slug from 'slug'
 import { v4 } from 'uuid'
@@ -62,4 +63,14 @@ type CreatePostProps = {
 
 export const createPost = async (data: CreatePostProps) => {
   return await prisma.post.create({ data })
+}
+
+export const updatePost = async (
+  slug: string,
+  data: Prisma.PostUpdateInput,
+) => {
+  return await prisma.post.update({
+    where: { slug },
+    data,
+  })
 }
