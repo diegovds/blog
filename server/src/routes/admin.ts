@@ -12,7 +12,7 @@ adminRoutes.post(
   adminController.addAPost,
 )
 adminRoutes.get('/posts', privateRoute, adminController.getPosts)
-adminRoutes.get('/posts/:slug', adminController.getAPost)
+adminRoutes.get('/posts/:slug', privateRoute, adminController.getPost)
 adminRoutes.put(
   '/posts/:slug',
   privateRoute,

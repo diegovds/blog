@@ -96,7 +96,40 @@ export const getPosts = async (req: ExtendedRequest, res: Response) => {
   res.json({ posts: postsToReturn, page })
 }
 
-export const getAPost = async () => {}
+export const getPost = async (req: ExtendedRequest, res: Response) => {
+  const paramsSchema = z.object({
+    slug: z.string(),
+  })
+
+  const params = paramsSchema.safeParse(req.params)
+
+  if (!params.success) {
+    res.json({ error: params.error.flatten().fieldErrors })
+    return
+  }
+
+  const { slug } = params.data
+
+  const post = await getPostBySlug(slug)
+
+  if (!post) {
+    res.json({ error: 'Post inexistente' })
+    return
+  }
+
+  res.json({
+    post: {
+      id: post.id,
+      title: post.title,
+      createdAt: post.createdAt,
+      cover: coverToUrl(post.cover),
+      authorName: post.author.name,
+      tags: post.tags,
+      body: post.body,
+      slug: post.slug,
+    },
+  })
+}
 
 export const editAPost = async (req: ExtendedRequest, res: Response) => {
   const paramsSchema = z.object({
