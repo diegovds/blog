@@ -101,3 +101,29 @@ export const getAllPosts = async (page: number) => {
 
   return posts
 }
+
+export const getPublishedPosts = async (page: number) => {
+  if (page <= 0) return []
+
+  const perPage = 5
+
+  const posts = await prisma.post.findMany({
+    where: {
+      status: 'PUBLISHED',
+    },
+    include: {
+      author: {
+        select: {
+          name: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+    take: perPage,
+    skip: (page - 1) * perPage,
+  })
+
+  return posts
+}
