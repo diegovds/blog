@@ -74,3 +74,7 @@ export const updatePost = async (
     data,
   })
 }
+
+export const deletePost = async (slug: string) => {
+  return await prisma.post.delete({ where: { slug } })
+}

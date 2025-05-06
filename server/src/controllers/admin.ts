@@ -3,6 +3,7 @@ import z from 'zod'
 import {
   createPost,
   createPostSlug,
+  deletePost,
   getPostBySlug,
   handleCover,
   updatePost,
@@ -140,4 +141,30 @@ export const editAPost = async (req: ExtendedRequest, res: Response) => {
   })
 }
 
-export const deleteAPost: RequestHandler = async (req, res) => {}
+export const deleteAPost: RequestHandler = async (
+  req: ExtendedRequest,
+  res: Response,
+) => {
+  const paramsSchema = z.object({
+    slug: z.string(),
+  })
+
+  const params = paramsSchema.safeParse(req.params)
+
+  if (!params.success) {
+    res.json({ error: params.error.flatten().fieldErrors })
+    return
+  }
+
+  const { slug } = params.data
+
+  const post = await getPostBySlug(slug)
+
+  if (!post) {
+    res.json({ error: 'Post inexistente' })
+    return
+  }
+
+  await deletePost(post.slug)
+  res.json({ error: null })
+}

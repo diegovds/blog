@@ -19,4 +19,4 @@ adminRoutes.put(
   upload.single('cover'),
   adminController.editAPost,
 )
-adminRoutes.delete('/posts/:slug', adminController.deleteAPost)
+adminRoutes.delete('/posts/:slug', privateRoute, adminController.deleteAPost)
