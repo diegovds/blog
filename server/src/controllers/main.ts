@@ -1,6 +1,7 @@
 import { RequestHandler } from 'express'
+import z from 'zod'
+import { getPostBySlug, getPublishedPosts } from '../services/post'
 import { coverToUrl } from '../utils/cover-to-url'
-import { getPublishedPosts } from '../services/post'
 
 export const getAllPosts: RequestHandler = async (req, res) => {
   let page = 1
@@ -30,6 +31,39 @@ export const getAllPosts: RequestHandler = async (req, res) => {
   res.json({ posts: postsToReturn, page })
 }
 
-export const getAPost: RequestHandler = async (req, res) => {}
+export const getPost: RequestHandler = async (req, res) => {
+  const paramsSchema = z.object({
+    slug: z.string(),
+  })
+
+  const params = paramsSchema.safeParse(req.params)
+
+  if (!params.success) {
+    res.json({ error: params.error.flatten().fieldErrors })
+    return
+  }
+
+  const { slug } = params.data
+
+  const post = await getPostBySlug(slug)
+
+  if (!post || (post && post.status === 'DRAFT')) {
+    res.json({ error: 'Post inexistente' })
+    return
+  }
+
+  res.json({
+    post: {
+      id: post.id,
+      title: post.title,
+      createdAt: post.createdAt,
+      cover: coverToUrl(post.cover),
+      authorName: post.author.name,
+      tags: post.tags,
+      body: post.body,
+      slug: post.slug,
+    },
+  })
+}
 
 export const getRelatedPosts: RequestHandler = async (req, res) => {}
