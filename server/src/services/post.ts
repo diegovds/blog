@@ -78,3 +78,26 @@ export const updatePost = async (
 export const deletePost = async (slug: string) => {
   return await prisma.post.delete({ where: { slug } })
 }
+
+export const getAllPosts = async (page: number) => {
+  if (page <= 0) return []
+
+  const perPage = 5
+
+  const posts = await prisma.post.findMany({
+    include: {
+      author: {
+        select: {
+          name: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+    take: perPage,
+    skip: (page - 1) * perPage,
+  })
+
+  return posts
+}

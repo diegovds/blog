@@ -1,9 +1,10 @@
-import { RequestHandler, Response } from 'express'
+import { Response } from 'express'
 import z from 'zod'
 import {
   createPost,
   createPostSlug,
   deletePost,
+  getAllPosts,
   getPostBySlug,
   handleCover,
   updatePost,
@@ -67,9 +68,35 @@ export const addAPost = async (req: ExtendedRequest, res: Response) => {
   }
 }
 
-export const getAllPosts: RequestHandler = async (req, res) => {}
+export const getPosts = async (req: ExtendedRequest, res: Response) => {
+  let page = 1
 
-export const getAPost: RequestHandler = async (req, res) => {}
+  if (req.query.page) {
+    page = parseInt(req.query.page as string)
+
+    if (page <= 0) {
+      res.json({ error: 'Página inexistente' })
+      return
+    }
+  }
+
+  const posts = await getAllPosts(page)
+
+  const postsToReturn = posts.map((post) => ({
+    id: post.id,
+    status: post.status,
+    title: post.title,
+    created: post.createdAt,
+    cover: coverToUrl(post.cover),
+    authorName: post.author.name,
+    tags: post.tags,
+    slug: post.slug,
+  }))
+
+  res.json({ posts: postsToReturn, page })
+}
+
+export const getAPost = async () => {}
 
 export const editAPost = async (req: ExtendedRequest, res: Response) => {
   const paramsSchema = z.object({
@@ -141,10 +168,7 @@ export const editAPost = async (req: ExtendedRequest, res: Response) => {
   })
 }
 
-export const deleteAPost: RequestHandler = async (
-  req: ExtendedRequest,
-  res: Response,
-) => {
+export const deleteAPost = async (req: ExtendedRequest, res: Response) => {
   const paramsSchema = z.object({
     slug: z.string(),
   })
