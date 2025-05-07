@@ -1,6 +1,6 @@
 import { RequestHandler } from 'express'
 import z from 'zod'
-import { getPostBySlug, getPublishedPosts } from '../services/post'
+import * as postServices from '../services/post'
 import { coverToUrl } from '../utils/cover-to-url'
 
 export const getAllPosts: RequestHandler = async (req, res) => {
@@ -15,7 +15,7 @@ export const getAllPosts: RequestHandler = async (req, res) => {
     }
   }
 
-  const posts = await getPublishedPosts(page)
+  const posts = await postServices.getPublishedPosts(page)
 
   const postsToReturn = posts.map((post) => ({
     id: post.id,
@@ -45,7 +45,7 @@ export const getPost: RequestHandler = async (req, res) => {
 
   const { slug } = params.data
 
-  const post = await getPostBySlug(slug)
+  const post = await postServices.getPostBySlug(slug)
 
   if (!post || (post && post.status === 'DRAFT')) {
     res.json({ error: 'Post inexistente' })
@@ -66,4 +66,31 @@ export const getPost: RequestHandler = async (req, res) => {
   })
 }
 
-export const getRelatedPosts: RequestHandler = async (req, res) => {}
+export const getRelatedPosts: RequestHandler = async (req, res) => {
+  const paramsSchema = z.object({
+    slug: z.string(),
+  })
+
+  const params = paramsSchema.safeParse(req.params)
+
+  if (!params.success) {
+    res.json({ error: params.error.flatten().fieldErrors })
+    return
+  }
+
+  const { slug } = params.data
+
+  const posts = await postServices.getPostsWithSameTags(slug)
+
+  const postsToReturn = posts.map((post) => ({
+    id: post.id,
+    title: post.title,
+    created: post.createdAt,
+    cover: coverToUrl(post.cover),
+    authorName: post.author.name,
+    tags: post.tags,
+    slug: post.slug,
+  }))
+
+  res.json({ posts: postsToReturn })
+}
